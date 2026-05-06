@@ -178,11 +178,15 @@ async def draw_home_info(ev, uid, home_info):
                     # 计算两个时间点之间的差异
                     delta = dt2 - dt1
                     # 提取小时和分钟
+                    days = delta.days
+                    day_mes = ''
+                    if days > 0:
+                        day_mes = f"{days}天"
                     hours = delta.seconds // 3600
                     minutes = (delta.seconds % 3600) // 60
                     pet_draw.text(
                         (166, 109),
-                        f'{hours}时{minutes}分',
+                        f'{day_mes}{hours}时{minutes}分',
                         (255, 255, 255),
                         rc_font_28,
                         'lm',
