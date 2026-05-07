@@ -8,6 +8,10 @@ Excel_path = Path(__file__).parent
 with Path.open(Excel_path / 'map' /'name-map.json', encoding='utf-8') as f:
     name_id_list = json.load(f)
 
+Excel_path = Path(__file__).parent
+with Path.open(Excel_path / 'map' /'pet_name_map.json', encoding='utf-8') as f:
+    pet_name_list = json.load(f)
+
 with Path.open(Excel_path / 'map' /'breeding.json', encoding='utf-8') as f:
     breeding = json.load(f)
     rocom_egg_conf = breeding["pet_egg_conf"]
@@ -21,6 +25,9 @@ with Path.open(Excel_path / 'map' /'RANDOM_GOODS_CONF.json', encoding='utf-8') a
 
 with Path.open(Excel_path / 'map' /'home_item_list.json', encoding='utf-8') as f:
     home_plant_list = json.load(f)
+
+with Path.open(Excel_path / 'map' /'mini-map.json', encoding='utf-8') as f:
+    pet_skill_list = json.load(f)
 
 class Roster:
     def __init__(self):
@@ -78,3 +85,11 @@ async def get_rankid2name(rankid):
 async def get_plant_info(plantid):
     plant_info = home_plant_list[str(plantid)]
     return plant_info
+
+async def get_skill_info(skillid):
+    skill_info = pet_skill_list[str(skillid)]
+    return skill_info
+
+async def get_pet_name_info(petid):
+    name_info = pet_name_list[str(petid)]
+    return name_info
