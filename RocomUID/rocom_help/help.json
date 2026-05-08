@@ -54,6 +54,22 @@
         "need_ck": false,
         "need_sk": true,
         "need_admin": false
+      },
+	  {
+        "name": "刷新面板",
+        "desc": "刷新面板",
+        "eg": "刷新面板[UID]",
+        "need_ck": false,
+        "need_sk": true,
+        "need_admin": false
+      },
+	  {
+        "name": "查询",
+        "desc": "查询",
+        "eg": "查询[ID/昵称][UID]",
+        "need_ck": false,
+        "need_sk": true,
+        "need_admin": false
       }
     ]
   },
