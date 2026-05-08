@@ -11,6 +11,7 @@ from ..utils.resource.RESOURCE_PATH import ROCOM_HEAD_PATH, ROCOM_ICON_PATH, ROC
 from ..utils.map.rocom_map import skill_list
 from ..utils.fonts.rocom_fonts import rc_font_30, rc_font_32, rc_font_34, rc_font_40, rc_font_64, rc_font_72, rc_font_22, rc_font_28, rc_font_44, skill_font_20, skill_font_22, skill_font_24, skill_font_32, skill_font_42
 from ..utils.convert import get_pet_name_info
+from ..utils.error_reply import prefix
 
 TEXT_PATH = Path(__file__).parent / 'texture2D'
 mask_bar = Image.open(TEXT_PATH / 'mask_bar.png')
@@ -415,13 +416,19 @@ async def draw_pet_list(uid, pet_data):
     img_draw = ImageDraw.Draw(img)
     #写昵称与uid
     img_draw.text(
-        (50, 110),
+        (45, 90),
         f'UID{uid} 精灵数据已刷新完成',
         (255, 255, 255),
         rc_font_44,
         'lm',
     )
-    
+    img_draw.text(
+        (45, 130),
+        f'可使用【{prefix}查询[ID]】查看精灵详细信息',
+        (255, 255, 255),
+        skill_font_24,
+        'lm',
+    )
     #画精灵背包
     img.paste(rocom_title, (48, 220), rocom_title)
     img_draw.text(
