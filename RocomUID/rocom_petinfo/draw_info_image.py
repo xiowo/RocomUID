@@ -446,7 +446,7 @@ async def draw_pet_list(uid, pet_data):
             overlay_img = copy.deepcopy(xuancai_overlay)
             head_img = Image.open(ROCOM_HEAD_PATH / f'{pet_info["pet_id"]}.png').convert('RGBA').resize((130, 130))
         pet_base = await get_pet_name_info(pet_info["pet_id"])
-        pet_bg_img = Image.new('RGBA', (150, 216), SHUX_LIST_DRAW[pet_base['unit_type'][0]])
+        pet_bg_img = Image.new('RGBA', (150, 216), SHUX_LIST_DRAW[pet_base['unit_type'][0]][0])
         combined_image = ImageChops.overlay(pet_bg_img, overlay_img)
         rocom_img.paste(combined_image, (0, 0), pet_bg)
         rocom_img.paste(pet_rocom, (0, 0), pet_rocom)
