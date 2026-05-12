@@ -61,6 +61,8 @@ async def get_my_home_info_refresh(bot: Bot, ev: Event):
             return await bot.send("你还没有绑定RC_UID哦!")
     else:
         uid = args[0]
+    if uid and not uid.isdigit():
+        return await bot.send("请输入正确的UID格式!")
     await bot.send(f"正在刷新[UID]{uid}的家园信息，请稍后")
     home_data = await api_to_dict_home_info(uid, PLAYER_PATH)
     if isinstance(home_data, str):
@@ -76,6 +78,8 @@ async def get_my_home_info_wegame(bot: Bot, ev: Event):
             return await bot.send("你还没有绑定RC_UID哦!")
     else:
         uid = args[0]
+    if uid and not uid.isdigit():
+        return await bot.send("请输入正确的UID格式!")
     await bot.send(f"正在获取[UID]{uid}的家园信息，请稍后")
     
     home_info = await get_my_home_info(uid)

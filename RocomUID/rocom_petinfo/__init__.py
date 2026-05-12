@@ -43,6 +43,8 @@ async def get_my_pet_info_refresh(bot: Bot, ev: Event):
             return await bot.send("你还没有绑定RC_UID哦!")
     else:
         uid = args[0]
+    if uid and not uid.isdigit():
+        return await bot.send("请输入正确的UID格式!")
     await bot.send(f"正在刷新[UID]{uid}的精灵信息，请稍后")
     pet_data = await get_my_pet_info_data(uid, refresh=True)
     if isinstance(pet_data, str):
@@ -96,6 +98,8 @@ async def get_my_pet_info(bot: Bot, ev: Event):
             return await bot.send("你还没有绑定RC_UID哦!")
     else:
         uid = args[1]
+    if uid and not uid.isdigit():
+        return await bot.send("请输入正确的UID格式!")
     pet_find_id = 0
     pet_find_name = args[0]
     #判断是否包含数字[精灵id]并提取
