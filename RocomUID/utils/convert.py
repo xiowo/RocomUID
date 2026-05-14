@@ -29,6 +29,9 @@ with Path.open(Excel_path / 'map' /'home_item_list.json', encoding='utf-8') as f
 with Path.open(Excel_path / 'map' /'mini-map.json', encoding='utf-8') as f:
     pet_skill_list = json.load(f)
 
+with Path.open(Excel_path / 'map' /'pet_list.json', encoding='utf-8') as f:
+    pet_list = json.load(f)
+
 class Roster:
     def __init__(self):
         self._roster = pygtrie.CharTrie()
@@ -36,14 +39,20 @@ class Roster:
 
     def update(self):
         self._roster.clear()
-        for idx, names in rocom_name_list.items():
-            for n in names:
-                if n not in self._roster:
-                    self._roster[n] = idx
+        for idx, item in pet_list.items():
+            from_name = item.get('form','')
+            if from_name != '':
+                if from_name not in self._roster:
+                    self._roster[from_name] = idx
+            pet_name = f"{item['name']}{from_name}"
+            if pet_name not in self._roster:
+                self._roster[pet_name] = idx
+            if f"{from_name}{item['name']}" not in self._roster:
+                self._roster[f"{from_name}{item['name']}"] = idx
         self._all_name_list = self._roster.keys()
 
     async def get_name(self, name):
-        return self._roster[name] if name in self._roster else ''
+        return self._roster[name] if name in self._roster else 0
     
     async def guess_name(self, name):
         """@return: id, name, score"""
@@ -56,16 +65,16 @@ async def get_rocom_name(name):
     rocom_name = await roster.get_name(name)
     confi = 100
     guess = False
-    if rocom_name != '':
+    if rocom_name != 0:
         return rocom_name
-    if rocom_name == '':
+    if rocom_name == 0:
         rocom_name, confi = await roster.guess_name(name)
         guess = True
     if confi < 60:
         return 0
     if guess:
         return rocom_name
-    return ''
+    return 0
     
 async def get_rocom_name2id(name):
     rocom_name = await get_rocom_name(name)
@@ -93,3 +102,7 @@ async def get_skill_info(skillid):
 async def get_pet_name_info(petid):
     name_info = pet_name_list[str(petid)]
     return name_info
+    
+async def get_pet_info(petid):
+    pet_info = pet_list[str(petid)]
+    return pet_info
