@@ -11,29 +11,11 @@ from ..utils.error_reply import get_error
 from gsuid_core.logger import logger
 from ..utils.database.model import RocomUser
 from ..utils.message import send_diff_msg
-from ..utils.api_client import APIClient
 from ..utils.error_reply import prefix as P
 from ..utils.convert import get_rocom_name2id
 from .draw_info_image import draw_user_info, draw_user_info_wegame
 
 sv_user_info = SV('rc用户信息查询', priority=5)
-
-# @sv_user_info.on_command(('我的信息','uid'))
-# async def get_my_user_info(bot: Bot, ev: Event):
-    # bind_uid = await RocomUser.select_rocom_user(ev.user_id, ev.bot_self_id)
-    # if not bind_uid:
-        # return await bot.send("你还没有绑定RC_UID哦!")
-    # token, account_type = await RocomUser.get_rocom_token(ev.user_id, ev.bot_self_id)
-    # if not token:
-        # return await bot.send("用户token不存在，请绑定后再查询!")
-    # data_user = await rocom_api.get_user_info(token=token, account_type = account_type)
-    # #print(data_user)
-    # if isinstance(data_user, int):
-        # return await bot.send(get_error(data_user))
-    # data_pet = await rocom_api.get_rocom_pet_list_star(token=token, account_type = account_type)
-    # #print(data_pet)
-    # im = await draw_user_info(ev, bind_uid, data_user, data_pet)
-    # await bot.send(im, at_sender=True)
 
 @sv_user_info.on_command(('档案','洛克档案','uid','我的信息'))
 async def get_my_user_info_wegame(bot: Bot, ev: Event):

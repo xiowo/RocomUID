@@ -7,7 +7,6 @@ from PIL import Image, ImageDraw
 from ..utils.image.image_tools import get_text_line
 from gsuid_core.utils.image.convert import convert_img
 from ..utils.resource.RESOURCE_PATH import ROCOM_ICON_PATH, ROCOM_SKILL_PATH, ROCOM_CHARACTER_PATH
-from ..utils.map.rocom_map import rocom_group_list, rocom_list, rocom_skill_list, characteristic_list, skill_list, rocom_evolution_list
 from ..utils.fonts.rocom_fonts import rc_font_28, rc_font_30, rc_font_32, rc_font_34, rc_font_40, rc_font_64, rc_font_72, skill_font_22, skill_font_32
 
 TEXT_PATH = Path(__file__).parent / 'texture2D'
@@ -61,6 +60,8 @@ jinhua_icon_list = {
 
 tag_w_add = [0, 132, 143]
 
+tag_title_list = ['attr_hp','attr_atk','attr_spatk','attr_def','attr_spdef','attr_spd']
+
 tag_title = ['HP', '物攻', '魔攻', '物防', '魔防', '速度']
 
 async def get_max_shuxing_num(zhongzu, shuxing_type = ''):
@@ -93,41 +94,39 @@ async def get_min_shuxing_num(zhongzu, shuxing_type = ''):
     shuxing_num = math.floor((jichu_num + (xishu * 60)) * 0.9 + chengzhang_num)
     return shuxing_num
 
-async def draw_rocom_info(rocomname):
-    rocom_info = rocom_list[rocomname]
+async def draw_rocom_info(rocom_info):
     bg_height = 1030
-    skill_level_list = rocom_skill_list[rocomname][0]
+    skill_level_list = rocom_info["level_skill_list"]
     skill_level_num = len(skill_level_list)
     if skill_level_num > 0:
         bg_height += math.ceil(skill_level_num / 5) * 99 + 80
     
-    skill_blood_list = rocom_skill_list[rocomname][1]
+    skill_blood_list = rocom_info["blood_skill_list"]
     if len(skill_blood_list) > 0:
         skill_blood_num = len(skill_blood_list)
         if skill_blood_num > 0:
             bg_height += math.ceil(skill_blood_num / 5) * 99 + 80
     
-    skill_stone_list = rocom_skill_list[rocomname][2]
+    skill_stone_list = rocom_info["machine_skill_list"]
     if len(skill_stone_list) > 0:
         skill_stone_num = len(skill_stone_list)
         if skill_stone_num > 0:
             bg_height += math.ceil(skill_stone_num / 5) * 99 + 80
     
     tx_line_height = 0
-    txname = rocom_list[rocomname][7]
-    tx_content = characteristic_list.get(txname, '')
+    txname = rocom_info["feature"].get("name",'')
+    tx_content = rocom_info["feature"].get("desc",'')
     txname_para = await get_text_line(f'{tx_content}', 28)
     tx_line_height += len(txname_para) * 40
     tx_line_height += 120
     tx_line_height = max(210, tx_line_height)
     
     bg_height += tx_line_height + 80
-    miaoshu = rocom_list[rocomname][9]
+    miaoshu = rocom_info["description"]
     miaoshu_para = await get_text_line(miaoshu, 31)
     miaoshu_height = len(miaoshu_para) * 40
-    if rocom_group_list.get(rocomname, 0) != 0:
-        if rocom_group_list[rocomname][0] != '无':
-            miaoshu_height = miaoshu_height + 40
+    if rocom_info.get("egg_group", 0) != 0:
+       miaoshu_height = miaoshu_height + 40
     bg_height += miaoshu_height
     bg_height += 80
     
@@ -153,17 +152,29 @@ async def draw_rocom_info(rocomname):
     )
     img_draw.text(
         (600, 260),
-        f'{rocomname}',
+        f'{rocom_info["name"]}',
         info_text_color,
         rc_font_64,
         'mm',
     )
-    pet_bg_img = Image.new('RGBA', (575, 575), SHUX_LIST_DRAW[rocom_info[6][0]])
+    if rocom_info.get('form','') != '':
+        img_draw.text(
+            (1050, 290),
+            f'{rocom_info["form"]}',
+            info_text_color,
+            rc_font_40,
+            'rm',
+        )
+    pet_bg_img = Image.new('RGBA', (575, 575), SHUX_LIST_DRAW[rocom_info["unit_type"][0]])
     
     img.paste(pet_bg_img, (-6, 359), pet_bg_mask)
+    
+    pet_icon = ROCOM_ICON_PATH / f'{rocom_info["icon"]}.png'
+    if not os.path.exists(pet_icon):
+        pet_icon = ROCOM_ICON_PATH / f'JL_dimo.png'
     # 画形象
     pokemon_img = (
-        Image.open(ROCOM_ICON_PATH / f'{rocomname}.png')
+        Image.open(pet_icon)
         .convert('RGBA')
         .resize((552, 552))
     )
@@ -184,7 +195,7 @@ async def draw_rocom_info(rocomname):
     y_num = 483
     for index_x in range(0, 3):
         x_num = x_num + tag_w_add[index_x]
-        for index_y in range(0, 6):
+        for index_y,item in enumerate(tag_title_list):
             tag_x = x_num
             tag_y = y_num + index_y * 54
             img.paste(tags_img, (tag_x, tag_y), tags_img)
@@ -198,16 +209,16 @@ async def draw_rocom_info(rocomname):
                 )
                 img_draw.text(
                     (tag_x + 58, tag_y + 22),
-                    f'{rocom_info[index_y]}',
+                    f'{rocom_info["attribute"][item]}',
                     (240, 236, 225),
                     rc_font_32,
                     'mm',
                 )
             elif index_x == 1:
                 if index_y == 0:
-                    min_num = await get_min_shuxing_num(rocom_info[index_y], 'HP')
+                    min_num = await get_min_shuxing_num(rocom_info["attribute"][item], 'HP')
                 else:
-                    min_num = await get_min_shuxing_num(rocom_info[index_y])
+                    min_num = await get_min_shuxing_num(rocom_info["attribute"][item])
                 img_draw.text(
                     (tag_x + 58, tag_y + 22),
                     f'{min_num}',
@@ -217,9 +228,9 @@ async def draw_rocom_info(rocomname):
                 )
             else:
                 if index_y == 0:
-                    max_num = await get_max_shuxing_num(rocom_info[index_y], 'HP')
+                    max_num = await get_max_shuxing_num(rocom_info["attribute"][item], 'HP')
                 else:
-                    max_num = await get_max_shuxing_num(rocom_info[index_y])
+                    max_num = await get_max_shuxing_num(rocom_info["attribute"][item])
                 img_draw.text(
                     (tag_x + 58, tag_y + 22),
                     f'{max_num}',
@@ -232,39 +243,39 @@ async def draw_rocom_info(rocomname):
     x_num = 565
     y_num = 820
     # +166 863 905
-    jinhua_num = len(rocom_evolution_list[rocomname][0])
-    for index, jinhua_name in enumerate(rocom_evolution_list[rocomname][0]):
+    jinhua_num = len(rocom_info["evolution_list"])
+    for index, item in enumerate(rocom_info["evolution_list"]):
         icon_x = x_num + jinhua_icon_list[f'{jinhua_num}_{index}']
         img.paste(jinhua_bg, (icon_x, y_num), jinhua_bg)
-        pokemon_img = Image.open(ROCOM_ICON_PATH / f'{jinhua_name}.png').convert('RGBA').resize((150, 150))
+        pokemon_img = Image.open(ROCOM_ICON_PATH / f'{item["icon"]}.png').convert('RGBA').resize((150, 150))
         img.paste(pokemon_img, (icon_x - 5, y_num + 10), pokemon_img)
         img_draw.text(
-            (icon_x + 70, y_num + 180),
-            f'{jinhua_name}',
+            (icon_x + 70, y_num + 220),
+            f'{item["name"]}',
             (60, 60, 60),
-            rc_font_28,
+            skill_font_22,
             'mm',
         )
         if jinhua_num > 1 and index > 0:
             img.paste(right_jinhua, (icon_x - 54, 863), right_jinhua)
             img_draw.text(
                 (icon_x - 54, 905),
-                f'{rocom_evolution_list[rocomname][1][index - 1]}',
+                f'{item["level"]}',
                 info_text_color,
                 rc_font_28,
                 'mm',
             )
-    if rocom_evolution_list[rocomname][2] != '':
-        img_draw.text(
-            (861, 1040),
-            f'{rocom_evolution_list[rocomname][2]}',
-            info_text_color,
-            rc_font_34,
-            'mm',
-        )
+    # if rocom_evolution_list[rocomname][2] != '':
+        # img_draw.text(
+            # (861, 1040),
+            # f'{rocom_evolution_list[rocomname][2]}',
+            # info_text_color,
+            # rc_font_34,
+            # 'mm',
+        # )
     
     # 画属性类型
-    for shul, shuxing in enumerate(rocom_info[6]):
+    for shul, shuxing in enumerate(rocom_info["unit_type"]):
         shuxing_img = Image.new('RGBA', (142, 38), SHUX_LIST_DRAW[shuxing])
         sx_image = Image.open(TEXT_PATH / f'{shuxing}.png').convert('RGBA').resize((42, 42))
         shuxing_img.paste(sx_image, (-2, -2), sx_image)
@@ -291,8 +302,8 @@ async def draw_rocom_info(rocomname):
     )
     start_height += 80
     miaoshu_h = 0
-    if rocom_group_list[rocomname][0] != '无':
-        danzu_str = ' '.join(rocom_group_list[rocomname])
+    if rocom_info.get("egg_group", 0) != 0:
+        danzu_str = ' '.join(rocom_info["egg_group"])
         img_draw.text(
             (90, start_height),
             f"蛋组：{danzu_str}",
@@ -364,18 +375,21 @@ async def draw_rocom_info(rocomname):
             jn_y = math.floor(shul / 5)
             jn_x = shul - (5 * jn_y)
             jineng_img = Image.new(
-                'RGBA', (207, 99), SHUX_LIST_DRAW[skill_list[jineng][0]]
+                'RGBA', (207, 99), SHUX_LIST_DRAW[jineng["families"]]
             )
-            skill_image = Image.open(ROCOM_SKILL_PATH / f'{jineng}.png').convert('RGBA').resize((67, 67))
+            jineng_icon = ROCOM_SKILL_PATH / f'{jineng["name"]}.png'
+            if not os.path.exists(jineng_icon):
+                jineng_icon = ROCOM_SKILL_PATH / f'抓挠.png'
+            skill_image = Image.open(jineng_icon).convert('RGBA').resize((67, 67))
             jineng_temp = Image.new('RGBA', (207, 99))
             jineng_temp.paste(jineng_img, (0, 0), skill_bg)
             jineng_temp.paste(skill_image, (15, 16), skill_image)
-            sx_image = Image.open(TEXT_PATH / f'{skill_list[jineng][0]}.png').convert('RGBA').resize((45, 45))
+            sx_image = Image.open(TEXT_PATH / f'{jineng["families"]}.png').convert('RGBA').resize((45, 45))
             jineng_temp.paste(sx_image, (-5, -5), sx_image)
             jineng_draw = ImageDraw.Draw(jineng_temp)
             jineng_draw.text(
                 (94, 35),
-                f'{jineng}',
+                f'{jineng["name"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',
@@ -383,7 +397,7 @@ async def draw_rocom_info(rocomname):
             jineng_temp.paste(cost_star, (92, 52), cost_star)
             jineng_draw.text(
                 (120, 65),
-                f'{skill_list[jineng][1]}',
+                f'{jineng["cost"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',
@@ -408,18 +422,21 @@ async def draw_rocom_info(rocomname):
             jn_y = math.floor(shul / 5)
             jn_x = shul - (5 * jn_y)
             jineng_img = Image.new(
-                'RGBA', (207, 99), SHUX_LIST_DRAW[skill_list[jineng][0]]
+                'RGBA', (207, 99), SHUX_LIST_DRAW[jineng["families"]]
             )
-            skill_image = Image.open(ROCOM_SKILL_PATH / f'{jineng}.png').convert('RGBA').resize((67, 67))
+            jineng_icon = ROCOM_SKILL_PATH / f'{jineng["name"]}.png'
+            if not os.path.exists(jineng_icon):
+                jineng_icon = ROCOM_SKILL_PATH / f'抓挠.png'
+            skill_image = Image.open(jineng_icon).convert('RGBA').resize((67, 67))
             jineng_temp = Image.new('RGBA', (207, 99))
             jineng_temp.paste(jineng_img, (0, 0), skill_bg)
             jineng_temp.paste(skill_image, (15, 16), skill_image)
-            sx_image = Image.open(TEXT_PATH / f'{skill_list[jineng][0]}.png').convert('RGBA').resize((45, 45))
+            sx_image = Image.open(TEXT_PATH / f'{jineng["families"]}.png').convert('RGBA').resize((45, 45))
             jineng_temp.paste(sx_image, (-5, -5), sx_image)
             jineng_draw = ImageDraw.Draw(jineng_temp)
             jineng_draw.text(
                 (94, 35),
-                f'{jineng}',
+                f'{jineng["name"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',
@@ -427,7 +444,7 @@ async def draw_rocom_info(rocomname):
             jineng_temp.paste(cost_star, (92, 52), cost_star)
             jineng_draw.text(
                 (120, 65),
-                f'{skill_list[jineng][1]}',
+                f'{jineng["cost"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',
@@ -454,18 +471,21 @@ async def draw_rocom_info(rocomname):
             jn_y = math.floor(shul / 5)
             jn_x = shul - (5 * jn_y)
             jineng_img = Image.new(
-                'RGBA', (207, 99), SHUX_LIST_DRAW[skill_list[jineng][0]]
+                'RGBA', (207, 99), SHUX_LIST_DRAW[jineng["families"]]
             )
-            skill_image = Image.open(ROCOM_SKILL_PATH / f'{jineng}.png').convert('RGBA').resize((67, 67))
+            jineng_icon = ROCOM_SKILL_PATH / f'{jineng["name"]}.png'
+            if not os.path.exists(jineng_icon):
+                jineng_icon = ROCOM_SKILL_PATH / f'抓挠.png'
+            skill_image = Image.open(jineng_icon).convert('RGBA').resize((67, 67))
             jineng_temp = Image.new('RGBA', (207, 99))
             jineng_temp.paste(jineng_img, (0, 0), skill_bg)
             jineng_temp.paste(skill_image, (15, 16), skill_image)
-            sx_image = Image.open(TEXT_PATH / f'{skill_list[jineng][0]}.png').convert('RGBA').resize((45, 45))
+            sx_image = Image.open(TEXT_PATH / f'{jineng["families"]}.png').convert('RGBA').resize((45, 45))
             jineng_temp.paste(sx_image, (-5, -5), sx_image)
             jineng_draw = ImageDraw.Draw(jineng_temp)
             jineng_draw.text(
                 (94, 35),
-                f'{jineng}',
+                f'{jineng["name"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',
@@ -473,7 +493,7 @@ async def draw_rocom_info(rocomname):
             jineng_temp.paste(cost_star, (92, 52), cost_star)
             jineng_draw.text(
                 (120, 65),
-                f'{skill_list[jineng][1]}',
+                f'{jineng["cost"]}',
                 (255, 255, 255),
                 skill_font_22,
                 'lm',

@@ -25,8 +25,14 @@ async def get_merchant_info_list(bot: Bot, ev: Event):
     im = await draw_merchant_info(merchant_info)
     await bot.send(im)
 
+@sv_merchant.on_command(('推送远行商人'))
+async def get_merchant_info_list(bot: Bot, ev: Event):
+    datas = await gs_subscribe.get_subscribe('[洛克王国] 远行商人')
+    for data in datas:
+        print(data)
+
 # 每日定点执行远行商人推送
-@scheduler.scheduled_job('cron', hour ='*')
+@scheduler.scheduled_job('cron', hour ='*', minute='02')
 async def refresh_merchant_info():
     now = datetime.now(pytz.timezone('Asia/Shanghai'))
     this_hour = now.hour

@@ -36,7 +36,39 @@
         "desc": "远行商人",
         "eg": "远行商人",
         "need_ck": false,
-        "need_sk": false,
+        "need_sk": true,
+        "need_admin": false
+      },
+	  {
+        "name": "远行商人推送",
+        "desc": "[开启/关闭]远行商人",
+        "eg": "[开启/关闭]远行商人",
+        "need_ck": false,
+        "need_sk": true,
+        "need_admin": false
+      },
+	  {
+        "name": "家园",
+        "desc": "家园",
+        "eg": "家园[UID]",
+        "need_ck": false,
+        "need_sk": true,
+        "need_admin": false
+      },
+	  {
+        "name": "刷新面板",
+        "desc": "刷新面板",
+        "eg": "刷新面板[UID]",
+        "need_ck": false,
+        "need_sk": true,
+        "need_admin": false
+      },
+	  {
+        "name": "查询",
+        "desc": "查询",
+        "eg": "查询[ID/昵称][UID]",
+        "need_ck": false,
+        "need_sk": true,
         "need_admin": false
       }
     ]
