@@ -120,7 +120,7 @@ async def draw_pet_info(uid, pet_data):
     #计算已学习技能占用
     skill_num = len(pet_data['skills'])
     if skill_num > 0:
-        bg_height += math.ceil(skill_num / 6) * 99 + 80
+        bg_height += math.ceil(skill_num / 5) * 99 + 80
     #计算特性信息占用
     tx_line_height = 0
     txname = pet_data['feature']['name']
