@@ -16,6 +16,8 @@ async def api_to_dict_home_info(
     homeinfo = home_data['home_info']
     home_info = {}
     home_info["home_info"] = {}
+    if homeinfo.get('friend_home_brief_info', 0) == 0:
+        return "没有获取到该用户的家园信息"
     #保存家园信息
     home_info["home_info"]['home_name'] = homeinfo['friend_home_brief_info']['home_name']
     home_info["home_info"]['home_experience'] = homeinfo['friend_home_brief_info']['home_experience']
@@ -60,7 +62,10 @@ async def api_to_dict_home_info(
         path.mkdir(parents=True, exist_ok=True)
         with Path.open(path / "home_info.json", "wb") as file:
             _ = file.write(msgjson.format(msgjson.encode(home_info), indent=4))
-    return home_info["home_info"]
+    home_return_date = {}
+    home_return_date = home_info["home_info"]
+    home_return_date['finished_at'] = home_info['meta']["finished_at"]
+    return home_return_date
 
 async def api_to_dict_pet_info(
     uid: Union[str, None] = None,
