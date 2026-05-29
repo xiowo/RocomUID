@@ -123,6 +123,6 @@ async def draw_merchant_info(merchant_info):
         if prop_item['name'] in ['炫彩精灵蛋', '棱镜球', '国王球']:
             prop_img.paste(susume, (371, 37), susume)
         img.paste(prop_img, (453 * rc_x + 14, rc_y * 206 + start_height), prop_img)
-    img.paste(footer, (277, img_height - 80), footer)
+    img.paste(footer, (277, img_height - 95), footer)
     res = await convert_img(img)
     return res
