@@ -67,6 +67,8 @@
 >
 >关于wegame_api_key：目前可以加群 [1097809141](https://qm.qq.com/q/8SuHC3siIM) 进行申请
 >
+>或前往网站申请，前往[洛克魔法书官网](https://rocom.shallow.ink)
+>
 >获取到wegame_api_key后去往gscore网站后台输入wegame_api_key后重启core才能使用
 >
 
