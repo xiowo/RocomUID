@@ -11,7 +11,21 @@ from gsuid_core.utils.database.startup import exec_list
 
 T_RocomUser = TypeVar("T_RocomUser", bound="RocomUser")
 
+ROCOM_USER_MIGRATIONS = [
+    'ALTER TABLE RocomUser ADD COLUMN framework_token TEXT DEFAULT ""',
+    'ALTER TABLE RocomUser ADD COLUMN binding_id TEXT DEFAULT ""',
+    'ALTER TABLE RocomUser ADD COLUMN bind_time INT DEFAULT 0',
+    'ALTER TABLE RocomUser ADD COLUMN login_type TEXT DEFAULT ""',
+]
+
+for migration_sql in ROCOM_USER_MIGRATIONS:
+    if migration_sql not in exec_list:
+        exec_list.append(migration_sql)
+
+
 class RocomUser(User, table=True):
+    __table_args__ = {"extend_existing": True}
+
     user_id: str = Field(default="", title="用户ID")
     bot_id: str = Field(default="", title="机器人ID")
     uid: str = Field(default="", title="洛克王国账号ID")
@@ -20,16 +34,7 @@ class RocomUser(User, table=True):
     binding_id: str = Field(default="", title="binding_id")
     bind_time: int = Field(default=0, title="bind_time")
     login_type: str = Field(default="", title="login_type")
-    
-    exec_list.extend(
-        [
-            'ALTER TABLE RocomUser ADD COLUMN framework_token TEXT DEFAULT ""',
-            'ALTER TABLE RocomUser ADD COLUMN binding_id TEXT DEFAULT ""',
-            'ALTER TABLE RocomUser ADD COLUMN bind_time INT DEFAULT 0',
-            'ALTER TABLE RocomUser ADD COLUMN login_type TEXT DEFAULT ""',
-        ]
-    )
-    
+
     @classmethod
     async def insert_rocom_uid(
         cls: Type[T_RocomUser],
